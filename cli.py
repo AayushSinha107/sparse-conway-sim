@@ -62,11 +62,11 @@ class UniverseGrid:
 
 if __name__ == "__main__":
     print("Creating the universe...")
-    universe = UniverseGrid(size=32)
+    universe = UniverseGrid(size=128)
 
     frames = []
     CELL_SIZE = 10  # Each grid cell becomes a 10x10 pixel square
-    GENERATIONS = 100  # How many frames to simulate
+    GENERATIONS = 1000  # How many frames to simulate
 
     print(f"Simulating {GENERATIONS} generations...")
     for _ in range(GENERATIONS):
