@@ -1,5 +1,6 @@
 # Handling imports
 import random
+from collections import Counter
 from PIL import Image, ImageDraw
 
 
@@ -21,43 +22,40 @@ class UniverseGrid:
     # initialize the class with default 32x32 size or user entered value
     def __init__(self, size=32):
         self.size = size
-        self.universe_matrix = [[0 for _ in range(self.size)] for _ in range(self.size)]
+        self.alive_cells = set()
 
         # generating a random initial state
-        for row in self.universe_matrix:
-            for i in range(self.size):
-                r = random.random()
-                if r <= 0.2:
-                    row[i] = 1
+        for i in range(self.size):
+            for j in range(self.size):
+                r = random.randint(0, 100)
+                if r <= 20:
+                    self.alive_cells.add((i, j))
                 else:
                     continue
 
     # function to count neighbours
-    def neighbour_count(self, i, j):
-        count = 0
-        for neighbour in self.neighbour_loc:
-            new_x = (i + neighbour[0]) % self.size
-            new_y = (j + neighbour[1]) % self.size
-            if self.universe_matrix[new_x][new_y] == 1:
-                count += 1
+    def neighbour_count(self):
+        count = Counter()
+        for x, y in self.alive_cells:
+            for dx in [-1, 0, 1]:
+                for dy in [-1, 0, 1]:
+                    if dx == 0 and dy == 0:
+                        continue
+                    count[((x + dx) % self.size, (y + dy) % self.size)] += 1
+
         return count
 
     # update the universe grid with next generation rules
     def update_matrix(self, n=1):
         for _ in range(n):
-            next_gen = [[0 for _ in range(self.size)] for _ in range(self.size)]
-            for i in range(self.size):
-                for j in range(self.size):
-                    if self.universe_matrix[i][j] == 1 and self.neighbour_count(
-                        i, j
-                    ) in [2, 3]:
-                        next_gen[i][j] = 1
-                    elif (
-                        self.universe_matrix[i][j] == 0
-                        and self.neighbour_count(i, j) == 3
-                    ):
-                        next_gen[i][j] = 1
-            self.universe_matrix = next_gen
+            next_gen = set()
+            count = self.neighbour_count()
+            for coord, neighbour in count.items():
+                if neighbour == 3:
+                    next_gen.add(coord)
+                elif neighbour == 2 and coord in self.alive_cells:
+                    next_gen.add(coord)
+            self.alive_cells = next_gen
 
 
 if __name__ == "__main__":
@@ -77,17 +75,10 @@ if __name__ == "__main__":
         draw = ImageDraw.Draw(img)
 
         # Draw the alive cells
-        for i in range(universe.size):
-            for j in range(universe.size):
-                if universe.universe_matrix[i][j] == 1:
-                    # Calculate the pixel corners for this cell
-                    x0 = j * CELL_SIZE
-                    y0 = i * CELL_SIZE
-                    x1 = x0 + CELL_SIZE
-                    y1 = y0 + CELL_SIZE
-
-                    # Draw a lime green square
-                    draw.rectangle([x0, y0, x1, y1], fill="lime")
+        for x, y in universe.alive_cells:
+            x0 = y * CELL_SIZE
+            y0 = x * CELL_SIZE
+            draw.rectangle([x0, y0, x0 + CELL_SIZE, y0 + CELL_SIZE], fill="lime")
 
         # Save this frame to our history list
         frames.append(img)
