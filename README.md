@@ -48,13 +48,13 @@ source venv/bin/activate
 ### 3. Install dependencies
 
 ```bash
-pip install Pillow
+pip install -r requirements.txt
 ```
 
 ### 4. Run the simulation
 
 ```bash
-python cli_4.py
+python main.py
 ```
 
 The engine will process the generations and output a `simulation.gif` file directly into your directory.
